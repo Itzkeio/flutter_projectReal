@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tsel_ui/signup/signup.dart';
 import 'package:tsel_ui/services/auth_service.dart';
+// cella
 
 class Login extends StatelessWidget {
   Login({super.key});
@@ -90,7 +91,7 @@ class Login extends StatelessWidget {
                       decoration: TextDecoration.none,
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -135,9 +136,7 @@ class Login extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xff9edb4b), // hijau terang
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
         onPressed: () async {
           await AuthService().signin(
@@ -148,10 +147,7 @@ class Login extends StatelessWidget {
         },
         child: const Text(
           "LOGIN",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
     );
