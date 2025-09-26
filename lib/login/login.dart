@@ -1,68 +1,96 @@
+import 'package:flutter/material.dart';
 import 'package:tsel_ui/signup/signup.dart';
 import 'package:tsel_ui/services/auth_service.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 
 class Login extends StatelessWidget {
   Login({super.key});
 
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Color(0xFFEAF4FF),
-          Color(0xFFB7DCF6),
-          Color(0xFF7EBEE8),
-          ],
-        ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        resizeToAvoidBottomInset: true,
-        bottomNavigationBar: _signup(context),
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          toolbarHeight: 100,
-          leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xffd9e9ef), Color(0xff8ebcd0)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
-        body: SafeArea(
+        child: SafeArea(
           child: SingleChildScrollView(
-           padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Center(
-                  child: Text(
-                    'Welcome Back',
-                    style: GoogleFonts.raleway(
-                      textStyle: const TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 32
-                      )
+                const SizedBox(height: 40),
+                // Logo dan nama perusahaan
+                Column(
+                  children: [
+                    Image.asset(
+                      'assets/images/logoHJ.png', // ganti dengan logo hexpharm jaya
+                      height: 80,
                     ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+                const SizedBox(height: 60),
+
+                // Username input
+                _buildTextField(
+                  controller: _usernameController,
+                  hint: "USERNAME",
+                  icon: Icons.person_outline,
+                  obscure: false,
+                ),
+                const SizedBox(height: 20),
+
+                // Password input
+                _buildTextField(
+                  controller: _passwordController,
+                  hint: "PASSWORD",
+                  icon: Icons.lock_outline,
+                  obscure: true,
+                ),
+                const SizedBox(height: 30),
+
+                // Tombol login
+                _loginButton(context),
+                const SizedBox(height: 12),
+
+                // Forgot password
+                TextButton(
+                  onPressed: () {},
+                  child: const Text(
+                    "Forgot Password ?",
+                    style: TextStyle(color: Colors.black54),
                   ),
                 ),
-                const SizedBox(height: 80,),
-                 _emailAddress(),
-                 const SizedBox(height: 20,),
-                 _password(),
-                 const SizedBox(height: 50,),
-                 _signin(context),
+
+                const SizedBox(height: 80),
+
+                // Sign Up text
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Signup()),
+                    );
+                  },
+                  child: const Text(
+                    "Sign Up",
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                )
               ],
             ),
           ),
@@ -70,140 +98,61 @@ class Login extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _emailAddress() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Email Address',
-          style: GoogleFonts.raleway(
-            textStyle: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.normal,
-              fontSize: 16
-            )
-          ),
-        ),
-        const SizedBox(height: 16,),
-        TextField(
-          controller: _emailController,
-          style: const TextStyle(color: Colors.black), 
-          decoration: InputDecoration(
-            filled: true,
-            hintText: 'your-email@gmail.com',
-            hintStyle: const TextStyle(
-              color: Color(0xff6A6A6A),
-              fontWeight: FontWeight.normal,
-              fontSize: 14
-            ),
-            fillColor: const Color(0xffF7F7F9) ,
-            border: OutlineInputBorder(
-              borderSide: BorderSide.none,
-              borderRadius: BorderRadius.circular(14)
-            )
-          ),
-        )
-      ],
-    );
-  }
 
-  Widget _password() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Password',
-          style: GoogleFonts.raleway(
-            textStyle: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.normal,
-              fontSize: 16
-            )
-          ),
-        ),
-        const SizedBox(height: 16,),
-        TextField(
-          obscureText: true,
-          controller: _passwordController,
-          style: const TextStyle(color: Colors.black), 
-          decoration: InputDecoration(
-            hintText: 'Your Password',
-            filled: true,
-            fillColor: const Color(0xffF7F7F9) ,
-            border: OutlineInputBorder(
-              borderSide: BorderSide.none,
-              borderRadius: BorderRadius.circular(14)
-            )
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget _signin(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromARGB(255, 141, 198, 63),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
-        minimumSize: const Size(double.infinity, 60),
-        elevation: 0,
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    required bool obscure,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xff00a79d),
+        borderRadius: BorderRadius.circular(6),
       ),
-      onPressed: () async {
-        await AuthService().signin(
-          email: _emailController.text,
-          password: _passwordController.text,
-          context: context
-        );
-      },
-      child: Text("Sign In", style: GoogleFonts.raleway(
-            textStyle: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold ,
-              fontSize: 20
-            ),
-      ),
+      child: TextField(
+        controller: controller,
+        obscureText: obscure,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          prefixIcon: Icon(icon, color: Colors.black),
+          hintText: hint,
+          hintStyle: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 18),
+        ),
       ),
     );
   }
 
-  Widget _signup(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: RichText(
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          children: [
-            const TextSpan(
-                text: "New User? ",
-                style: TextStyle(
-                  color: Color(0xff6A6A6A),
-                  fontWeight: FontWeight.normal,
-                  fontSize: 16
-                ),
-              ),
-              TextSpan(
-                text: "Create Account",
-                style: const TextStyle(
-                    color: Color(0xff1A1D1E),
-                    fontWeight: FontWeight.normal,
-                    fontSize: 16
-                  ),
-                  recognizer: TapGestureRecognizer()..onTap = () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Signup()
-                      ),
-                    );
-                  }
-              ),
-          ]
-        )
+  Widget _loginButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 55,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xff9edb4b), // hijau terang
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+        onPressed: () async {
+          await AuthService().signin(
+            email: _usernameController.text,
+            password: _passwordController.text,
+            context: context,
+          );
+        },
+        child: const Text(
+          "LOGIN",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }
