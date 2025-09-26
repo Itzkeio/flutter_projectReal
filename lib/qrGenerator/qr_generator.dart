@@ -47,7 +47,7 @@ class _QrGeneratorState extends State<QrGenerator> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            //Input field
+            // Input field
             TextField(
               controller: _controller,
               decoration: InputDecoration(
