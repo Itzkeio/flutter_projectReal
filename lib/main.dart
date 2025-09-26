@@ -71,7 +71,7 @@ class MyApp extends StatelessWidget {
             // '/notifications': (_) => const NotificationsPage(),
             '/profile': (_) => const ProfilePage(),
             QrScanner.routeName: (_) => const QrScanner(),
-
+            QrGenerator.routeName: (_) => const QrGenerator(),
             // qr_scanner.routeName: (_) => const qr_scanner(),     // '/qr-scan'
             // qr_generator.routeName: (_) => const qr_generator(), // '/qr-generate'
           },
