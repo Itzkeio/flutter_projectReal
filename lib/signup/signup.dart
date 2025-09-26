@@ -12,42 +12,55 @@ class Signup extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: true,
-      bottomNavigationBar: _signin(context),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        toolbarHeight: 50
+    return Container(
+       decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color(0xFFEAF4FF),
+          Color(0xFFB7DCF6),
+          Color(0xFF7EBEE8),
+          ],
+        ),
       ),
-      body: SafeArea(
-        child:SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          child: Column(
-            children: [
-              Center(
-                child: Text(
-                  'Register Account',
-                  style: GoogleFonts.raleway(
-                    textStyle: const TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 32
-                    )
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        resizeToAvoidBottomInset: true,
+        bottomNavigationBar: _signin(context),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          toolbarHeight: 50
+        ),
+        body: SafeArea(
+          child:SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Column(
+              children: [
+                Center(
+                  child: Text(
+                    'Register Account',
+                    style: GoogleFonts.raleway(
+                      textStyle: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 32
+                      )
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 80,),
-              _emailAddress(),
-              const SizedBox(height: 20,),
-              _password(),
-              const SizedBox(height: 50),
-              _signup(context),
-            ],
-          ),
-        )
-        )
+                const SizedBox(height: 80,),
+                _emailAddress(),
+                const SizedBox(height: 20,),
+                _password(),
+                const SizedBox(height: 50),
+                _signup(context),
+              ],
+            ),
+          )
+          )
+      ),
     );
   }
 
@@ -124,7 +137,7 @@ class Signup extends StatelessWidget {
   Widget _signup(BuildContext context){
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xff0D6EFD),
+        backgroundColor: const Color.fromARGB(255, 141, 198, 63),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadiusGeometry.circular(14),
         ),
