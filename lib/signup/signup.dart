@@ -9,19 +9,15 @@ class Signup extends StatelessWidget {
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
-       decoration: const BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Color(0xFFEAF4FF),
-          Color(0xFFB7DCF6),
-          Color(0xFF7EBEE8),
-          ],
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFEAF4FF), Color(0xFFB7DCF6), Color(0xFF7EBEE8)],
         ),
       ),
       child: Scaffold(
@@ -31,138 +27,141 @@ class Signup extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          toolbarHeight: 50
+          toolbarHeight: 50,
         ),
         body: SafeArea(
-          child:SingleChildScrollView(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Column(
               children: [
+                Image.asset(
+                  'assets/images/logoHJ.png', // Ganti dengan path logo Anda
+                  height: 100,
+                  width: 200,
+                ),
+                const SizedBox(height: 10),
                 Center(
                   child: Text(
-                    'Register Account',
+                    'REGIST ACCOUNT',
                     style: GoogleFonts.raleway(
                       textStyle: const TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
-                        fontSize: 32
-                      )
+                        fontSize: 24,
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 80,),
+                const SizedBox(height: 40),
                 _emailAddress(),
-                const SizedBox(height: 20,),
+                const SizedBox(height: 20),
                 _password(),
-                const SizedBox(height: 50),
+                const SizedBox(height: 40),
                 _signup(context),
               ],
             ),
-          )
-          )
+          ),
+        ),
       ),
     );
   }
 
-  Widget _emailAddress(){
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Email Address",
-          style: GoogleFonts.raleway(
-            textStyle: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.normal,
-              fontSize: 16,
-            )
-          ),
-        ),
-        const SizedBox(height: 16,),
-        TextField(
-          controller: _emailController,
-          decoration: InputDecoration(
-            filled: true,
-            hintText: "your-email@gmail.com",
-            hintStyle: const TextStyle(
-              color: Color(0xff6A6A6A),
-              fontWeight: FontWeight.normal,
-              fontSize: 14,
+  Widget _emailAddress() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xff099688),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          children: [
+            const Icon(Icons.person, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _emailController,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'EMAIL',
+                  hintStyle: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.normal,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
             ),
-            fillColor: const Color(0xffF7F7F9),
-            border: OutlineInputBorder(
-              borderSide: BorderSide.none,
-              borderRadius: BorderRadius.circular(14)
-            )
-          ),
-        )
-      ],
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _password(){
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Password",
-          style: GoogleFonts.raleway(
-            textStyle: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.normal,
-              fontSize: 16,
-            )
-          ),
+  Widget _password() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xff099688),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          children: [
+            const Icon(Icons.lock, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _passwordController,
+                obscureText: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'PASSWORD',
+                  hintStyle: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.normal,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 16,),
-        TextField(
-          controller: _passwordController,
-        obscureText: true,
-        decoration: InputDecoration(
-          hintText: 'Your Password',
-          filled: true,
-          fillColor: const Color(0xffF7F7F9) ,
-            border: OutlineInputBorder(
-              borderSide: BorderSide.none,
-              borderRadius: BorderRadius.circular(14)
-            )
-        ),
-        )
-      ],
+      ),
     );
   }
 
-  Widget _signup(BuildContext context){
+  Widget _signup(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromARGB(255, 141, 198, 63),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadiusGeometry.circular(14),
-        ),
+        backgroundColor: const Color(0xff8dc63f),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         minimumSize: const Size(double.infinity, 60),
-        elevation: 0
+        elevation: 0,
       ),
-      onPressed: () async{
+      onPressed: () async {
         await AuthService().signup(
           email: _emailController.text,
           password: _passwordController.text,
-          context: context
+          context: context,
         );
       },
-      child: Text("Sign Up", style: GoogleFonts.raleway(
-            textStyle: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold ,
-              fontSize: 20
-            ),
-      ),
+      child: Text(
+        "Sign Up",
+        style: GoogleFonts.raleway(
+          textStyle: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
       ),
     );
   }
 
-  Widget _signin(BuildContext context){
+  Widget _signin(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: RichText(
@@ -172,26 +171,27 @@ class Signup extends StatelessWidget {
             const TextSpan(
               text: "Already have an account ? ",
               style: TextStyle(
-                color: Color(0xff6A6A6A),
+                color: Color(0xff1A1D1E),
                 fontWeight: FontWeight.normal,
-                fontSize: 16
+                fontSize: 16,
               ),
             ),
             TextSpan(
               text: "Login",
               style: const TextStyle(
-                color: Color(0xff1A1D1E),
+                color: Color(0xff099688),
                 fontWeight: FontWeight.normal,
-                fontSize: 16
+                fontSize: 16,
               ),
-              recognizer: TapGestureRecognizer()..onTap = (){
-                Navigator.push(
-                  context, 
-                  MaterialPageRoute(builder:(context) => Login() ),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Login()),
                   );
-              }
-            )
-          ]
+                },
+            ),
+          ],
         ),
       ),
     );
