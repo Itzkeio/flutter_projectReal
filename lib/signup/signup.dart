@@ -47,7 +47,7 @@ class Signup extends StatelessWidget {
                       textStyle: const TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
-                        fontSize: 24, // Ukuran font disesuaikan
+                        fontSize: 24,
                       ),
                     ),
                   ),
@@ -67,72 +67,76 @@ class Signup extends StatelessWidget {
   }
 
   Widget _emailAddress() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          controller: _emailController,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            filled: true,
-            hintText: "email address",
-            hintStyle: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.normal,
-              fontSize: 16,
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xff099688),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          children: [
+            const Icon(Icons.person, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _emailController,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'EMAIL',
+                  hintStyle: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.normal,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
             ),
-            fillColor: const Color(0xff099688), // Warna disesuaikan
-            border: OutlineInputBorder(
-              borderSide: BorderSide.none,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            prefixIcon: const Icon(
-              Icons.person,
-              color: Colors.white,
-            ), // Icon disesuaikan
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
   Widget _password() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          controller: _passwordController,
-          obscureText: true,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            filled: true,
-            hintText: 'Password',
-            hintStyle: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.normal,
-              fontSize: 16,
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xff099688),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          children: [
+            const Icon(Icons.lock, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _passwordController,
+                obscureText: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'PASSWORD',
+                  hintStyle: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.normal,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
             ),
-            fillColor: const Color(0xff099688), // Warna disesuaikan
-            border: OutlineInputBorder(
-              borderSide: BorderSide.none,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            prefixIcon: const Icon(
-              Icons.lock,
-              color: Colors.white,
-            ), // Icon disesuaikan
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
   Widget _signup(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xff8dc63f), // Warna disesuaikan
+        backgroundColor: const Color(0xff8dc63f),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         minimumSize: const Size(double.infinity, 60),
         elevation: 0,
@@ -167,7 +171,7 @@ class Signup extends StatelessWidget {
             const TextSpan(
               text: "Already have an account ? ",
               style: TextStyle(
-                color: Color(0xff1A1D1E), // Warna disesuaikan
+                color: Color(0xff1A1D1E),
                 fontWeight: FontWeight.normal,
                 fontSize: 16,
               ),
@@ -175,7 +179,7 @@ class Signup extends StatelessWidget {
             TextSpan(
               text: "Login",
               style: const TextStyle(
-                color: Color(0xff099688), // Warna disesuaikan
+                color: Color(0xff099688),
                 fontWeight: FontWeight.normal,
                 fontSize: 16,
               ),
