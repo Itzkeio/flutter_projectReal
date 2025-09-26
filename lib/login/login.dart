@@ -160,9 +160,13 @@ class Login extends StatelessWidget {
           context: context
         );
       },
-      child: const Text("Sign In", style: TextStyle(
-        color: Colors.white,
-        ),
+      child: Text("Sign In", style: GoogleFonts.raleway(
+            textStyle: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold ,
+              fontSize: 20
+            ),
+      ),
       ),
     );
   }

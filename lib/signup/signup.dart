@@ -151,10 +151,14 @@ class Signup extends StatelessWidget {
           context: context
         );
       },
-      child: const Text("Sign Up", style: TextStyle(
-        color: Colors.white,
-          ),
-        ),
+      child: Text("Sign Up", style: GoogleFonts.raleway(
+            textStyle: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold ,
+              fontSize: 20
+            ),
+      ),
+      ),
     );
   }
 
