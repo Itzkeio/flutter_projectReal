@@ -18,7 +18,7 @@ class HomePage extends StatelessWidget {
             end: Alignment.bottomCenter,
           )
         : const LinearGradient(
-            colors: [Color(0xFFEAF4FF), Color(0xFFCFE8F9)],
+            colors: [Color(0xFFEAF4FF), Color(0xff8ebcd0)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           );
