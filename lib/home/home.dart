@@ -41,10 +41,10 @@ class HomePage extends StatelessWidget {
             icon: Icon(Icons.home_outlined),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_none),
-            label: 'Notification',
-          ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.notifications_none),
+          //   label: 'Notification',
+          // ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             label: 'Profile',
