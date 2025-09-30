@@ -1,8 +1,11 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'firebase_options.dart';
+
+import 'package:permission_handler/permission_handler.dart';
 
 // Auth pages
 import 'login/login.dart';
@@ -10,16 +13,46 @@ import 'signup/signup.dart';
 
 // App pages
 import 'home/home.dart';
-import 'notification/notification_page.dart';
 import 'profile/profile_page.dart';
 import 'qrscan/qr_scanner.dart';
 import 'qrGenerator/qr_generator.dart';
+
 // Global theme controller (provides themeModeNotifier)
 import 'theme/theme-controller.dart';
+
+// Global plugin instance
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+const AndroidNotificationChannel channel = AndroidNotificationChannel(
+  'save_channel', // id
+  'Save Notifications', // title
+  description: 'Channel for profile save notifications',
+  importance: Importance.high,
+);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  final status = await Permission.notification.request();
+  if (!status.isGranted) {
+    debugPrint("Notification permission not granted");
+  }
+
+  //Init notification
+  const AndroidInitializationSettings androidInit =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+  const InitializationSettings initSettings =
+      InitializationSettings(android: androidInit);
+
+  await flutterLocalNotificationsPlugin.initialize(initSettings);
+
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+
   runApp(const MyApp());
 }
 

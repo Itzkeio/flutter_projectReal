@@ -168,7 +168,7 @@ class HomePage extends StatelessWidget {
 }
 
 class _GreetingChip extends StatelessWidget {
-  const _GreetingChip({super.key});
+  const _GreetingChip();
 
   @override
   Widget build(BuildContext context) {

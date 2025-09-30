@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
+import '../utils/notification_helper.dart';
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
   static const routeName = '/profile';
@@ -156,8 +158,17 @@ class _ProfilePageState extends State<ProfilePage> {
       }, SetOptions(merge: true));
 
       if (!mounted) return;
+
+      //Tampilkan snackbar (opsional)
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Profile saved')));
+
+      //Tambahin notifikasi lokal
+      await showSuccessNotification(
+        "Profile Updated",
+        "Your profile has been saved successfully!",
+      );
+
       Navigator.maybePop(context);
     } catch (e) {
       if (!mounted) return;
@@ -319,7 +330,7 @@ Widget build(BuildContext context) {
             Text('Role', style: TextStyle(color: scheme.onSurfaceVariant)),
             const SizedBox(height: 6),
             DropdownButtonFormField<String>(
-              value: _role,
+              initialValue: _role,
               decoration: InputDecoration(
                 filled: true,
                 fillColor: fieldFill,
