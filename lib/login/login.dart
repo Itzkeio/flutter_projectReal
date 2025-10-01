@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:tsel_ui/signup/signup.dart';
-// GANTI: pakai service SQLite, bukan Firebase
 import 'package:tsel_ui/services/auth_service.dart';
 
 class Login extends StatelessWidget {

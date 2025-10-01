@@ -4,9 +4,6 @@ import 'package:tsel_ui/theme/theme-controller.dart';
 // GANTI: pakai auth SQLite
 import 'package:tsel_ui/services/auth_service.dart';
 
-// HAPUS Firebase
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
 
 // Tambah: SharedPreferences & DAO SQLite
 import 'package:shared_preferences/shared_preferences.dart';
