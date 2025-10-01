@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:tsel_ui/theme/theme-controller.dart';
+
+// GANTI: pakai auth SQLite
 import 'package:tsel_ui/services/auth_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
+// HAPUS Firebase
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
+
+// Tambah: SharedPreferences & DAO SQLite
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tsel_ui/data/user_dao.dart';
+
+// Jika kamu sudah expose routeName di widget QR:
+import 'package:tsel_ui/qrscan/qr_scanner.dart';
+import 'package:tsel_ui/qrGenerator/qr_generator.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -29,9 +41,6 @@ class HomePage extends StatelessWidget {
         onTap: (i) {
           if (i == 0) {
             Navigator.pushReplacementNamed(context, '/');
-            // }else if(i == 1){
-            //   Navigator.pushReplacement(context,'/notifications');
-            // }
           } else {
             Navigator.pushReplacementNamed(context, '/profile');
           }
@@ -41,10 +50,6 @@ class HomePage extends StatelessWidget {
             icon: Icon(Icons.home_outlined),
             label: 'Home',
           ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.notifications_none),
-          //   label: 'Notification',
-          // ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             label: 'Profile',
@@ -95,10 +100,7 @@ class HomePage extends StatelessWidget {
                       icon: const Icon(Icons.logout),
                       onPressed: () async {
                         try {
-                          await AuthService().signout(
-                            context: context,
-                          ); // <-- pass context + use instance
-                          // No extra Navigator push here — signout() already navigates to /login
+                          await AuthServiceSqlite().signout(context: context);
                         } catch (e) {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -112,15 +114,10 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  16,
-                  10,
-                  16,
-                  14,
-                ), // left, top, right, bottom
-                child: const _GreetingChip(),
+
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 10, 16, 14),
+                child: _GreetingChip(),
               ),
               const SizedBox(height: 40),
 
@@ -134,12 +131,14 @@ class HomePage extends StatelessWidget {
                     _ActionIcon(
                       icon: Icons.photo_camera_outlined,
                       label: 'Camera',
-                      onTap: (ctx) => Navigator.pushNamed(ctx, '/qr-scan'),
+                      onTap: (ctx) =>
+                          Navigator.pushNamed(ctx, QrScanner.routeName),
                     ),
                     _ActionIcon(
                       icon: Icons.qr_code_2,
                       label: 'QR Code',
-                      onTap: (ctx) => Navigator.pushNamed(ctx, '/qr-generate'),
+                      onTap: (ctx) =>
+                          Navigator.pushNamed(ctx, QrGenerator.routeName),
                     ),
                     _ActionIcon(
                       icon: Icons.credit_card,
@@ -154,7 +153,7 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 24), // small bottom space,
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -170,67 +169,40 @@ class HomePage extends StatelessWidget {
 class _GreetingChip extends StatelessWidget {
   const _GreetingChip();
 
-  @override
-  Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final email = user?.email?.trim().toLowerCase();
+  Future<_UserDisplay> _loadUser() async {
+    final sp = await SharedPreferences.getInstance();
+    final email = sp.getString('current_email')?.trim().toLowerCase();
 
-    // No signed-in user
     if (email == null || email.isEmpty) {
-      return _bubble(context, role: '—', name: 'User', loading: false);
+      return const _UserDisplay(role: '—', name: 'User');
     }
 
-    // Query by email (store emails lowercased in Firestore)
-    final Stream<QuerySnapshot<Map<String, dynamic>>> stream = FirebaseFirestore
-        .instance
-        .collection('users')
-        .where('email', isEqualTo: email)
-        .limit(1)
-        .snapshots();
+    final dao = UserDao();
+    final user = await dao.findByEmail(email);
 
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: stream,
-      builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snap) {
+    final name = (user?.displayName?.trim().isNotEmpty ?? false)
+        ? user!.displayName!.trim()
+        : ''; // kosongkan kalau tak ada
+    final role = (user?.role?.trim().isNotEmpty ?? false)
+        ? user!.role!.trim()
+        : '—';
+
+    return _UserDisplay(role: role, name: name.isEmpty ? '…' : name);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<_UserDisplay>(
+      future: _loadUser(),
+      builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          return _bubble(
-            context,
-            role: 'Loading…',
-            name: 'User',
-            loading: true,
-          );
+          return _bubble(context, role: 'Loading…', name: '…', loading: true);
         }
         if (snap.hasError) {
           return _bubble(context, role: 'Error', name: 'User', loading: false);
         }
-
-        Map<String, dynamic>? data;
-        if (snap.hasData && snap.data!.docs.isNotEmpty) {
-          data = snap.data!.docs.first.data();
-        }
-
-        // Prefer Firestore name → Auth displayName → (no fallback if you want strict)
-        final firestoreName =
-            (data?['name'] ?? data?['fullName'] ?? data?['displayName'])
-                as String?;
-        // If you NEVER want "User", use empty string fallback instead:
-        final String name = (firestoreName?.trim().isNotEmpty ?? false)
-            ? firestoreName!.trim()
-            : ((user?.displayName?.trim().isNotEmpty ?? false)
-                  ? user!.displayName!.trim()
-                  : ''); // ← empty when missing
-
-        final String role =
-            ((data?['role'] as String?)?.trim().isNotEmpty ?? false)
-            ? (data!['role'] as String).trim()
-            : '—';
-
-        return _bubble(
-          context,
-          role: role,
-          // If you want to strictly avoid "Hi, User", show placeholder dots instead
-          name: name.isEmpty ? '…' : name,
-          loading: false,
-        );
+        final data = snap.data ?? const _UserDisplay(role: '—', name: 'User');
+        return _bubble(context, role: data.role, name: data.name, loading: false);
       },
     );
   }
@@ -266,6 +238,12 @@ class _GreetingChip extends StatelessWidget {
       ),
     );
   }
+}
+
+class _UserDisplay {
+  final String role;
+  final String name;
+  const _UserDisplay({required this.role, required this.name});
 }
 
 class _ActionIcon extends StatelessWidget {

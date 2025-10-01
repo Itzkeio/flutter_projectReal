@@ -1,68 +1,90 @@
 // lib/main.dart
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-import 'firebase_options.dart';
-
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// Auth pages
+// Pages
 import 'login/login.dart';
 import 'signup/signup.dart';
-
-// App pages
 import 'home/home.dart';
 import 'profile/profile_page.dart';
 import 'qrscan/qr_scanner.dart';
 import 'qrGenerator/qr_generator.dart';
 
-// Global theme controller (provides themeModeNotifier)
+// Theme controller
 import 'theme/theme-controller.dart';
 
-// Global plugin instance
+// SQLite init
+import 'data/app_database.dart';
+
+// Notifikasi lokal
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
-  'save_channel', // id
-  'Save Notifications', // title
+  'save_channel',
+  'Save Notifications',
   description: 'Channel for profile save notifications',
   importance: Importance.high,
 );
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  
-  final status = await Permission.notification.request();
-  if (!status.isGranted) {
-    debugPrint("Notification permission not granted");
-  }
+Future<void> _initNotifications() async {
+  // iOS settings (biar gak error di iOS)
+  const darwinInit = DarwinInitializationSettings();
 
-  //Init notification
-  const AndroidInitializationSettings androidInit =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-  const InitializationSettings initSettings =
-      InitializationSettings(android: androidInit);
+  // Android settings
+  const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const initSettings = InitializationSettings(
+    android: androidInit,
+    iOS: darwinInit,
+  );
 
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(channel);
+  // Android-only: buat channel + minta permission (Android 13+)
+  if (Platform.isAndroid) {
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
 
-  runApp(const MyApp());
+    // Permission notifikasi (Android 13+)
+    final status = await Permission.notification.request();
+    if (!status.isGranted) {
+      debugPrint("Notification permission not granted");
+    }
+  }
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Init SQLite lebih awal
+  await AppDatabase().database;
+
+  // Init notifikasi (dengan guard platform)
+  await _initNotifications();
+
+  // Tentukan initialRoute berdasarkan sesi lokal
+  final sp = await SharedPreferences.getInstance();
+  final currentEmail = sp.getString('current_email');
+  final initialRoute =
+      (currentEmail != null && currentEmail.isNotEmpty) ? '/' : '/login';
+
+  runApp(MyApp(initialRoute: initialRoute));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.initialRoute});
+  final String initialRoute;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ThemeMode>(
-      valueListenable: themeModeNotifier, // toggled from Home
+      valueListenable: themeModeNotifier,
       builder: (_, mode, __) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
@@ -92,21 +114,15 @@ class MyApp extends StatelessWidget {
             ),
           ),
 
-          // Start on Login
-          initialRoute: '/login',
+          initialRoute: initialRoute,
 
-          // Named routes
           routes: {
             '/login': (_) => Login(),
             '/signup': (_) => Signup(),
-
             '/': (_) => const HomePage(),
-            // '/notifications': (_) => const NotificationsPage(),
             '/profile': (_) => const ProfilePage(),
             QrScanner.routeName: (_) => const QrScanner(),
             QrGenerator.routeName: (_) => const QrGenerator(),
-            // qr_scanner.routeName: (_) => const qr_scanner(),     // '/qr-scan'
-            // qr_generator.routeName: (_) => const qr_generator(), // '/qr-generate'
           },
         );
       },

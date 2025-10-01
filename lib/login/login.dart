@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:tsel_ui/signup/signup.dart';
+// GANTI: pakai service SQLite, bukan Firebase
 import 'package:tsel_ui/services/auth_service.dart';
-// cella
 
 class Login extends StatelessWidget {
   Login({super.key});
-  // cella
 
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  // cella
+
+  // Instance service SQLite
+  final AuthServiceSqlite _auth = AuthServiceSqlite();
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +32,11 @@ class Login extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 40),
-                // Logo dan nama perusahaan
+                // Logo
                 Column(
                   children: [
                     Image.asset(
-                      'assets/images/logoHJ.png', // ganti dengan logo hexpharm jaya
+                      'assets/images/logoHJ.png',
                       height: 80,
                     ),
                     const SizedBox(height: 8),
@@ -43,10 +44,10 @@ class Login extends StatelessWidget {
                 ),
                 const SizedBox(height: 60),
 
-                // Username input
+                // Username (email) input
                 _buildTextField(
                   controller: _usernameController,
-                  hint: "USERNAME",
+                  hint: "USERNAME / EMAIL",
                   icon: Icons.person_outline,
                   obscure: false,
                 ),
@@ -65,9 +66,12 @@ class Login extends StatelessWidget {
                 _loginButton(context),
                 const SizedBox(height: 12),
 
-                // Forgot password
+                // Forgot password (nonaktif di auth lokal)
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // Untuk auth lokal (SQLite) tidak ada reset via email.
+                    // Kamu bisa arahkan ke halaman set password lokal jika diperlukan.
+                  },
                   child: const Text(
                     "Forgot Password ?",
                     style: TextStyle(color: Colors.black54),
@@ -137,12 +141,13 @@ class Login extends StatelessWidget {
       height: 55,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xff9edb4b), // hijau terang
+          backgroundColor: const Color(0xff9edb4b),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
         onPressed: () async {
-          await AuthService().signin(
-            email: _usernameController.text,
+          // Panggil SIGN IN versi SQLite
+          await _auth.signin(
+            email: _usernameController.text,    // di auth lokal tetap pakai email sebagai key
             password: _passwordController.text,
             context: context,
           );

@@ -1,5 +1,5 @@
 import 'package:tsel_ui/login/login.dart';
-import 'package:tsel_ui/services/auth_service.dart';
+import 'package:tsel_ui/services/auth_service.dart'; // <-- GANTI: pakai service SQLite
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,6 +9,9 @@ class Signup extends StatelessWidget {
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  // Instance service SQLite
+  final AuthServiceSqlite _auth = AuthServiceSqlite();
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +38,7 @@ class Signup extends StatelessWidget {
             child: Column(
               children: [
                 Image.asset(
-                  'assets/images/logoHJ.png', // Ganti dengan path logo Anda
+                  'assets/images/logoHJ.png',
                   height: 100,
                   width: 200,
                 ),
@@ -81,6 +84,7 @@ class Signup extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   border: InputBorder.none,
@@ -142,9 +146,21 @@ class Signup extends StatelessWidget {
         elevation: 0,
       ),
       onPressed: () async {
-        await AuthService().signup(
-          email: _emailController.text,
-          password: _passwordController.text,
+        // VALIDASI SEDERHANA (opsional)
+        final email = _emailController.text.trim();
+        final pwd = _passwordController.text;
+
+        if (email.isEmpty || pwd.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Email dan password tidak boleh kosong')),
+          );
+          return;
+        }
+
+        // Panggil SIGN UP versi SQLite
+        await _auth.signup(
+          email: email,
+          password: pwd,
           context: context,
         );
       },
