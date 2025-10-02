@@ -115,4 +115,15 @@ class UserDao {
       whereArgs: [id],
     );
   }
+    Future<UserEntity?> getLastLoggedInUser() async {
+    final db = await _db;
+    final rows = await db.query(
+      'users',
+      orderBy: 'last_login_at DESC, updated_at DESC',
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return UserEntity.fromMap(rows.first);
+  }
 }
+

@@ -45,7 +45,13 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _load() async {
     final sp = await SharedPreferences.getInstance();
     final email = sp.getString('current_email')?.trim().toLowerCase();
-    if (email == null || email.isEmpty) return;
+    if (email == null || email.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email sesi tidak ditemukan. Coba login ulang.')),
+      );
+      return;
+    }
 
     final user = await _dao.findByEmail(email);
     _user = user;
@@ -72,7 +78,7 @@ class _ProfilePageState extends State<ProfilePage> {
     // Optional: hapus file lama kalau ada
     if (_photoPath != null && _photoPath!.isNotEmpty) {
       final old = File(_photoPath!);
-      if (await old.exists()) {
+      if (old.existsSync()) {
         try {
           await old.delete();
         } catch (_) {}
@@ -81,6 +87,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     await File(x.path).copy(destPath);
 
+    if (!mounted) return;
     setState(() {
       _photoPath = destPath; // simpan path baru
     });
@@ -105,6 +112,15 @@ class _ProfilePageState extends State<ProfilePage> {
         return;
       }
 
+      // Validasi ringan (opsional)
+      final displayName = _nameCtrl.text.trim();
+      if (displayName.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Nama tidak boleh kosong.')),
+        );
+        return;
+      }
+
       final now = DateTime.now().millisecondsSinceEpoch;
 
       if (_user == null) {
@@ -114,8 +130,7 @@ class _ProfilePageState extends State<ProfilePage> {
           uid: null,
           email: email,
           passwordHash: _emptyOrKeep(), // tidak mengubah password di sini
-          displayName:
-              _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),
+          displayName: displayName,
           role: _role,
           photoPath: _photoPath,
           createdAt: now,
@@ -127,8 +142,7 @@ class _ProfilePageState extends State<ProfilePage> {
       } else {
         // UPDATE data yang boleh diubah dari Profile
         final updated = _user!.copyWith(
-          displayName:
-              _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),
+          displayName: displayName,
           role: _role,
           photoPath: _photoPath,
           updatedAt: now,
@@ -150,7 +164,8 @@ class _ProfilePageState extends State<ProfilePage> {
         "Your profile has been saved successfully!",
       );
 
-      Navigator.maybePop(context);
+      // Kembali ke Home & beri sinyal bahwa data berubah
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -168,7 +183,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // ✨ same gradient as Home
+    // ✨ gradient mirip Home
     final gradient = isDark
         ? const LinearGradient(
             colors: [Color(0xFF0F1220), Color(0xFF1C2030)],
@@ -183,6 +198,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final fieldFill = isDark ? Colors.white10 : Colors.white;
     final avatarBg = isDark ? Colors.white12 : Colors.white;
+
+    final photoExists = (_photoPath != null &&
+        _photoPath!.isNotEmpty &&
+        File(_photoPath!).existsSync());
 
     return Scaffold(
       appBar: AppBar(
@@ -199,7 +218,7 @@ class _ProfilePageState extends State<ProfilePage> {
           onPressed: () {
             final nav = Navigator.of(context);
             if (nav.canPop()) {
-              nav.pop();
+              nav.pop(false); // ← balik tanpa mengubah data
             } else {
               nav.pushReplacementNamed('/');
             }
@@ -233,10 +252,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     CircleAvatar(
                       radius: 48,
                       backgroundColor: avatarBg,
-                      backgroundImage: (_photoPath != null && _photoPath!.isNotEmpty)
-                          ? FileImage(File(_photoPath!))
-                          : null,
-                      child: (_photoPath == null || _photoPath!.isEmpty)
+                      backgroundImage:
+                          photoExists ? FileImage(File(_photoPath!)) : null,
+                      child: !photoExists
                           ? const Icon(Icons.person, size: 48)
                           : null,
                     ),
@@ -286,7 +304,7 @@ class _ProfilePageState extends State<ProfilePage> {
               TextField(
                 controller: _emailCtrl,
                 readOnly: true,
-                style: TextStyle(color: scheme.onSurface), // biar selalu terlihat
+                style: TextStyle(color: scheme.onSurface),
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: fieldFill,
@@ -332,9 +350,12 @@ class _ProfilePageState extends State<ProfilePage> {
               FilledButton.icon(
                 onPressed: _saving ? null : _save,
                 icon: const Icon(Icons.save),
-                label: const Text('Save Changes'),
+                label: const Text(
+                  'Save Changes',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xff0D6EFD),
+                  backgroundColor: const Color(0xff9edb4b),
                 ),
               ),
             ],
