@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const HomePage());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ✅ Logo dari asset
-                Image.asset("assets/image/logoHJ.png", height: 40),
+                Image.asset("assets/images/logoHJ.png", height: 40),
                 const Spacer(),
                 Row(
                   children: const [
@@ -361,4 +361,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
