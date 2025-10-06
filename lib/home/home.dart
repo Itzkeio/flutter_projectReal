@@ -18,7 +18,7 @@ class HomePage extends StatelessWidget {
             end: Alignment.bottomCenter,
           )
         : const LinearGradient(
-            colors: [Color(0xFFEAF4FF), Color(0xFFCFE8F9)],
+            colors: [Color(0xFFEAF4FF), Color(0xff8ebcd0)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           );
@@ -41,10 +41,10 @@ class HomePage extends StatelessWidget {
             icon: Icon(Icons.home_outlined),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_none),
-            label: 'Notification',
-          ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.notifications_none),
+          //   label: 'Notification',
+          // ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             label: 'Profile',
@@ -168,7 +168,7 @@ class HomePage extends StatelessWidget {
 }
 
 class _GreetingChip extends StatelessWidget {
-  const _GreetingChip({super.key});
+  const _GreetingChip();
 
   @override
   Widget build(BuildContext context) {
