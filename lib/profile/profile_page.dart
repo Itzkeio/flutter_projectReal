@@ -179,33 +179,28 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
- @override
+@override
 Widget build(BuildContext context) {
-  final scheme = Theme.of(context).colorScheme;
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-
-  // ✨ same gradient as Home
-  final gradient = isDark
-      ? const LinearGradient(
-          colors: [Color(0xFF0F1220), Color(0xFF1C2030)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        )
-      : const LinearGradient(
-          colors: [Color(0xFFEAF4FF), Color(0xFFCFE8F9)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        );
-
-  // backgrounds that look good on a gradient
+  // theme helpers yang dipakai di AppBar & fields
+  final scheme  = Theme.of(context).colorScheme;
+  final isDark  = Theme.of(context).brightness == Brightness.dark;
   final fieldFill = isDark ? Colors.white10 : Colors.white;
   final avatarBg = isDark ? Colors.white12 : Colors.white;
 
-  final avatarBytes = _avatarBytesFromBase64(_photoBase64);
+  // foto dari base64 (pakai helper milikmu)
+  final Uint8List? avatarBytes = _avatarBytesFromBase64(_photoBase64);
+
+  // gradient yang sama dengan Home
+  const homeGradient = LinearGradient(
+    colors: [Color(0xFFDFF6F6), Color(0xFFB7E1E6)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
 
   return Scaffold(
+    extendBodyBehindAppBar: true,
     appBar: AppBar(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
@@ -238,9 +233,9 @@ Widget build(BuildContext context) {
       ],
     ),
 
-    // 🌈 Put the gradient behind the content
     body: Container(
-      decoration: BoxDecoration(gradient: gradient),
+      // kalau muncul keluhan "const variable", ganti ke: BoxDecoration(gradient: homeGradient)
+      decoration: const BoxDecoration(gradient: homeGradient),
       child: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -278,14 +273,13 @@ Widget build(BuildContext context) {
                             contentPadding: EdgeInsets.zero,
                           ),
                         ),
-                        // 'remove' item is added conditionally below
                       ],
                       onSelected: (v) async {
                         if (v == 'camera') {
                           await _changePhotoFromCamera();
                         } else if (v == 'gallery') {
                           await _changePhotoFromGallery();
-                        } 
+                        }
                       },
                       child: const CircleAvatar(
                         radius: 18,
@@ -346,9 +340,12 @@ Widget build(BuildContext context) {
             FilledButton.icon(
               onPressed: _saving ? null : _save,
               icon: const Icon(Icons.save),
-              label: const Text('Save Changes',),
+              label: const Text('Save Changes', 
+              style: TextStyle(fontWeight: FontWeight.bold,
+              fontSize: 18),
+              ),
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xff0D6EFD)
+                backgroundColor: const Color(0xff9edb4b),
               ),
             ),
           ],
@@ -357,4 +354,5 @@ Widget build(BuildContext context) {
     ),
   );
 }
+
 }
