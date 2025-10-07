@@ -169,7 +169,7 @@ class _ProfilePageState extends State<ProfilePage> {
         "Your profile has been saved successfully!",
       );
 
-      Navigator.maybePop(context);
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
