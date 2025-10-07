@@ -160,8 +160,8 @@ class _ProfilePageState extends State<ProfilePage> {
       if (!mounted) return;
 
       //Tampilkan snackbar (opsional)
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Profile saved')));
+      // ScaffoldMessenger.of(context)
+      //     .showSnackBar(const SnackBar(content: Text('Profile saved')));
 
       //Tambahin notifikasi lokal
       await showSuccessNotification(
