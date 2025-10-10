@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -102,6 +103,59 @@ class AuthService {
     } catch (e) {
       debugPrint('❌ Signin unexpected error: $e');
       _toast('Sign in failed. Please try again.');
+    }
+  }
+
+   // ---------------- SIGN IN WITH MICROSOFT ----------------
+  Future<void> signinWithMicrosoft({required BuildContext context}) async {
+    try {
+      final provider = OAuthProvider('microsoft.com');
+
+      // scope minimal (lihat doc Microsoft Graph; tambah sesuai kebutuhan)
+      provider.addScope('User.Read');
+      // supaya user bisa pilih akun setiap kali
+      provider.setCustomParameters({'prompt': 'select_account'});
+
+      UserCredential cred;
+      if (kIsWeb) {
+        // Web
+        cred = await _auth.signInWithPopup(provider);
+      } else {
+        // Android / iOS
+        cred = await _auth.signInWithProvider(provider);
+      }
+
+      final user = cred.user!;
+      // Buat doc kalo user baru, atau sentuh timestamp saat login
+      try {
+        if (cred.additionalUserInfo?.isNewUser == true) {
+          await _createUserDocOnSignup(user);
+        } else {
+          await _touchUserDocOnSignin(user);
+        }
+      } on FirebaseException catch (e) {
+        debugPrint('❌ Firestore on microsoft signin failed: [${e.code}] ${e.message}');
+      } catch (e) {
+        debugPrint('❌ Firestore on microsoft signin failed: $e');
+      }
+
+      if (!context.mounted) return;
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (r) => false);
+    } on FirebaseAuthException catch (e) {
+      // beberapa kode error umum untuk OAuth
+      final msg = switch (e.code) {
+        'account-exists-with-different-credential' =>
+          'Email sudah terpakai dengan metode login lain.',
+        'invalid-credential' => 'Kredensial tidak valid.',
+        'operation-not-allowed' => 'Login Microsoft belum diaktifkan.',
+        'user-disabled' => 'Akun dinonaktifkan.',
+        'popup-closed-by-user' => 'Login dibatalkan.',
+        _ => e.message ?? 'Sign in with Microsoft error: ${e.code}',
+      };
+      _toast(msg);
+    } catch (e) {
+      debugPrint('❌ Microsoft signin unexpected error: $e');
+      _toast('Sign in with Microsoft failed. Please try again.');
     }
   }
 

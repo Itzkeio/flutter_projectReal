@@ -1,12 +1,11 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:firebase_auth/firebase_auth.dart';                // ⬅️ cek user
-import 'package:flutter_native_splash/flutter_native_splash.dart'; // ⬅️ native splash
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:tsel_ui/utils/notification_helper.dart'; // ⬅️ IMPORT THE SERVICE
 
 import 'firebase_options.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 // Auth pages
 import 'login/login.dart';
@@ -21,48 +20,18 @@ import 'qrGenerator/qr_generator.dart';
 // Global theme controller (provides themeModeNotifier)
 import 'theme/theme-controller.dart';
 
-// Global plugin instance
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
-
-const AndroidNotificationChannel channel = AndroidNotificationChannel(
-  'save_channel', // id
-  'Save Notifications', // title
-  description: 'Channel for profile save notifications',
-  importance: Importance.high,
-);
-
 Future<void> main() async {
-  // ====== Tahan native splash sampai init selesai ======
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding); // ⬅️
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  // Firebase init
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // Permission notifikasi (Android 13+)
-  final status = await Permission.notification.request();
-  if (!status.isGranted) {
-    debugPrint("Notification permission not granted");
-  }
-
-  // Init local notifications
-  const AndroidInitializationSettings androidInit =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-  const InitializationSettings initSettings =
-      InitializationSettings(android: androidInit);
-
-  await flutterLocalNotificationsPlugin.initialize(initSettings);
-
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(channel);
+  
+  // ⭐️ THIS ONE LINE NOW SETS UP ALL PUSH NOTIFICATIONS ⭐️
+  await NotificationService.instance.initialize();
 
   runApp(const MyApp());
 
-  // Lepas splash native setelah MaterialApp naik
-  FlutterNativeSplash.remove(); // ⬅️
+  FlutterNativeSplash.remove();
 }
 
 class MyApp extends StatelessWidget {
@@ -71,13 +40,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ThemeMode>(
-      valueListenable: themeModeNotifier, // toggled from Home
+      valueListenable: themeModeNotifier,
       builder: (_, mode, __) {
         return MaterialApp(
+          // Assign the global navigatorKey from the helper file
+          navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           themeMode: mode,
-
-          // Light theme
           theme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.light,
@@ -88,8 +57,6 @@ class MyApp extends StatelessWidget {
               brightness: Brightness.light,
             ),
           ),
-
-          // Dark theme
           darkTheme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.dark,
@@ -100,17 +67,13 @@ class MyApp extends StatelessWidget {
               brightness: Brightness.dark,
             ),
           ),
-
-          // MULAI dari Splash (bukan langsung Login)
-          initialRoute: '/splash', // ⬅️
-
+          initialRoute: '/splash',
           routes: {
-            '/splash': (_) => const SplashPage(), // ⬅️ in-app splash
+            '/splash': (_) => const SplashPage(),
             '/login': (_) => Login(),
             '/signup': (_) => Signup(),
-
             '/': (_) => const HomePage(),
-            '/profile': (_) => const ProfilePage(),
+            ProfilePage.routeName: (_) => const ProfilePage(),
             QrScanner.routeName: (_) => const QrScanner(),
             QrGenerator.routeName: (_) => const QrGenerator(),
           },
@@ -120,9 +83,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// ==================== In-app Splash ====================
-/// Cek status login, lalu navigate ke Login atau Home.
-/// Background disamakan dengan gradient Home/Profile.
+// ... (Your SplashPage remains unchanged) ...
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
   @override
@@ -137,9 +98,7 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   Future<void> _boot() async {
-    // beri jeda kecil untuk branding/animasi (opsional)
-    await Future.delayed(const Duration(milliseconds: 600));
-
+    await Future.delayed(const Duration(milliseconds: 300));
     final user = FirebaseAuth.instance.currentUser;
     if (!mounted) return;
     Navigator.pushReplacementNamed(context, user == null ? '/login' : '/');
@@ -152,7 +111,6 @@ class _SplashPageState extends State<SplashPage> {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
     );
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       body: Container(
@@ -161,13 +119,12 @@ class _SplashPageState extends State<SplashPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: const [
-              // ganti path logo jika beda
-              // Image.asset('assets/images/logoHJ.png', height: 96),
-              // kalau belum mau pakai logo, tampilkan teks dulu:
-              Text('HJ App', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
+              Text('HJ App',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
               SizedBox(height: 16),
               SizedBox(
-                width: 28, height: 28,
+                width: 28,
+                height: 28,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
             ],

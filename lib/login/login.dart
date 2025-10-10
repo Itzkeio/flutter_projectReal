@@ -1,15 +1,51 @@
+// lib/login/login.dart
 import 'package:flutter/material.dart';
 import 'package:tsel_ui/signup/signup.dart';
 import 'package:tsel_ui/services/auth_service.dart';
-// cella
 
-class Login extends StatelessWidget {
+class Login extends StatefulWidget {
   Login({super.key});
-  // cella
 
+  @override
+  State<Login> createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  // cella
+
+  bool _obscure = true;
+  bool _loadingEmail = false;
+  bool _loadingMs = false;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _doEmailLogin() async {
+    setState(() => _loadingEmail = true);
+    try {
+      await AuthService().signin(
+        email: _usernameController.text.trim(),
+        password: _passwordController.text,
+        context: context,
+      );
+    } finally {
+      if (mounted) setState(() => _loadingEmail = false);
+    }
+  }
+
+  Future<void> _doMicrosoftLogin() async {
+    setState(() => _loadingMs = true);
+    try {
+      await AuthService().signinWithMicrosoft(context: context);
+    } finally {
+      if (mounted) setState(() => _loadingMs = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +67,11 @@ class Login extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 40),
-                // Logo dan nama perusahaan
+                // Logo
                 Column(
                   children: [
                     Image.asset(
-                      'assets/images/logoHJ.png', // ganti dengan logo hexpharm jaya
+                      'assets/images/logoHJ.png',
                       height: 80,
                     ),
                     const SizedBox(height: 8),
@@ -43,7 +79,7 @@ class Login extends StatelessWidget {
                 ),
                 const SizedBox(height: 60),
 
-                // Username input
+                // Username
                 _buildTextField(
                   controller: _usernameController,
                   hint: "USERNAME",
@@ -52,20 +88,36 @@ class Login extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Password input
-                _buildTextField(
-                  controller: _passwordController,
-                  hint: "PASSWORD",
-                  icon: Icons.lock_outline,
-                  obscure: true,
-                ),
-                const SizedBox(height: 30),
+                // Password
+                _buildPasswordField(),
 
-                // Tombol login
+                const SizedBox(height: 24),
+
+                // Tombol login email/password
                 _loginButton(context),
+
+                const SizedBox(height: 16),
+
+                // Separator OR
+                Row(
+                  children: const [
+                    Expanded(child: Divider(thickness: 1, color: Colors.white70)),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Text('OR', style: TextStyle(color: Colors.white70)),
+                    ),
+                    Expanded(child: Divider(thickness: 1, color: Colors.white70)),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Tombol login Microsoft
+                _msLoginButton(context),
+
                 const SizedBox(height: 12),
 
-                // Forgot password
+                // Forgot password (opsional)
                 TextButton(
                   onPressed: () {},
                   child: const Text(
@@ -74,9 +126,9 @@ class Login extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 80),
+                const SizedBox(height: 60),
 
-                // Sign Up text
+                // Sign Up
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -131,26 +183,84 @@ class Login extends StatelessWidget {
     );
   }
 
+  Widget _buildPasswordField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xff00a79d),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: TextField(
+        controller: _passwordController,
+        obscureText: _obscure,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          prefixIcon: const Icon(Icons.lock_outline, color: Colors.black),
+          hintText: "PASSWORD",
+          hintStyle: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 18),
+          suffixIcon: IconButton(
+            tooltip: _obscure ? 'Show password' : 'Hide password',
+            icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off,
+                color: Colors.white),
+            onPressed: () => setState(() => _obscure = !_obscure),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _loginButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       height: 55,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xff9edb4b), // hijau terang
+          backgroundColor: const Color(0xff9edb4b),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
-        onPressed: () async {
-          await AuthService().signin(
-            email: _usernameController.text,
-            password: _passwordController.text,
-            context: context,
-          );
-        },
-        child: const Text(
-          "LOGIN",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+        onPressed: _loadingEmail ? null : _doEmailLogin,
+        child: _loadingEmail
+            ? const SizedBox(
+                width: 22, height: 22,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              )
+            : const Text(
+                "LOGIN",
+                style: TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+              ),
+      ),
+    );
+  }
+
+  Widget _msLoginButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 55,
+      child: OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.white,
+          side: const BorderSide(color: Colors.black12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
+        icon: _loadingMs
+            ? const SizedBox(
+                width: 18, height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.account_circle, color: Colors.black87),
+        label: Text(
+          _loadingMs ? 'Signing in...' : 'Sign in with Microsoft',
+          style: const TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        onPressed: _loadingMs ? null : _doMicrosoftLogin,
       ),
     );
   }
